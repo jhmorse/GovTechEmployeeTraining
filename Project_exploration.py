@@ -2,7 +2,7 @@
 """
 Created on Tue Feb 21 11:14:43 2023
 
-@author: jomors
+@author: john.h.morse@gmail.com
 """
 
 # Import libraries
@@ -17,7 +17,7 @@ os.chdir(curr_dir)
 
 # Open Excel data file
 filename = 'Data/WBG_GovTech Dataset_Oct2022.xlsx'
-govtech_raw = pd.read_excel(filename, sheet_name = 'CG_GTMI_Groups', nrows=198)
+govtech_raw = pd.read_excel(curr_dir + filename, sheet_name = 'CG_GTMI_Groups', nrows=198)
 
 govtech_raw.head()
 govtech_raw.columns
