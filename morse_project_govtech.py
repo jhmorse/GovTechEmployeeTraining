@@ -47,6 +47,16 @@ govtech = govtech.rename(columns = colnames)
 govtech.head()
 
 #%%
+# Several of the columns get read in as objects instead of numeric.
+# Need to convert these to numeric for evaluation.
+govtech['DSProgram'] = pd.to_numeric(govtech.DSProgram)
+govtech['DSProgramType'] = pd.to_numeric(govtech.DSProgramType)
+govtech['DSProgramMandatory'] = pd.to_numeric(govtech.DSProgramMandatory)
+govtech['DSProgramExternal'] = pd.to_numeric(govtech.DSProgramExternal)
+govtech['DSProgramPublished'] = pd.to_numeric(govtech.DSProgramPublished)
+govtech.info()
+
+#%%
 
 ## GovTech Projects Data
 #filename = '../Data/WBG_DG-GovTech_Projects_Oct2022.xlsx'
@@ -317,16 +327,11 @@ govtech_gdp['logGDP'] = np.log(govtech_gdp['GDP2021'])
 # We are breaking this into two matrices for simplicity in reading
 columns = ['GTMI', 'GTEI', 'DS_Strategy_Program', 'FocusArea', 'DSProgram', 'DSProgramType']
 subset = govtech_gdp[columns].copy()
-subset['DSProgram'] = pd.to_numeric(subset.DSProgram)
-subset['DSProgramType'] = pd.to_numeric(subset.DSProgramType)
 subset.corr()
 
 # And repeat with the remaining data
 columns = ['GTMI', 'GTEI', 'DSProgramMandatory', 'DSProgramExternal', 'DSProgramPublished']
 subset = govtech_gdp[columns].copy()
-subset['DSProgramMandatory'] = pd.to_numeric(subset.DSProgramMandatory)
-subset['DSProgramExternal'] = pd.to_numeric(subset.DSProgramExternal)
-subset['DSProgramPublished'] = pd.to_numeric(subset.DSProgramPublished)
 subset.corr()
 
 
