@@ -21,7 +21,7 @@ curr_dir = os.getcwd()
 
 # Path where files are located
 path = 'C:/Users/jomors/OneDrive/_JHU/AS.470.708 Open Data in Python/Project/Data/'
-
+path = 'C:/Users/johnh/OneDrive/_JHU/AS.470.708 Open Data in Python/Project/Data/'
 ## GovTech GTMI Scoring data
 # Open Excel data file
 #filename = '../Data/WBG_GovTech Dataset_Oct2022.xlsx'
@@ -329,6 +329,8 @@ columns = ['GTMI', 'GTEI', 'DS_Strategy_Program', 'FocusArea', 'DSProgram', 'DSP
 subset = govtech_gdp[columns].copy()
 subset.corr()
 
+#%%
+
 # And repeat with the remaining data
 columns = ['GTMI', 'GTEI', 'DSProgramMandatory', 'DSProgramExternal', 'DSProgramPublished']
 subset = govtech_gdp[columns].copy()
@@ -361,12 +363,15 @@ sns.lmplot(data=govtech_gdp, x='GTEI', y='GTMI')
 # Import statsmodels
 import statsmodels.formula.api as smf
 
+#%%
 # Create dummy variables out of the IncomeLevel categorical variable
 dummies=pd.get_dummies(govtech_gdp['IncomeLevel'], prefix='IL', drop_first = True)
 # Add the resulting dummies into the larger data set
-govtech_gdp['IL_LM'] = dummies['IL_LM']
-govtech_gdp['IL_UM'] = dummies['IL_UM']
-govtech_gdp['IL_H'] = dummies['IL_H']
+govtech_gdp['IL_LM'] = pd.to_numeric(dummies['IL_LM'])
+govtech_gdp['IL_UM'] = pd.to_numeric(dummies['IL_UM'])
+govtech_gdp['IL_H'] = pd.to_numeric(dummies['IL_H'])
+
+#%%
 
 # Add in our independent variables to account for OVB, including the dummies created for IncomeLevel
 model = smf.ols('GTMI ~ GTEI + logPopulation + logGDP + IL_LM + IL_UM + IL_H', data=govtech_gdp)
