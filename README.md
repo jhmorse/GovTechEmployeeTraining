@@ -8,9 +8,10 @@ Employee training, though often included as part of the scope of overall managem
 In this project, I attempt to demonstrate a direct relationship between the investment in training individuals on new technology and the success of those technological solutions for the organization as whole, and for individual solutions or projects completed. More specifically, through the analysis of survey data collected by the World Bank Group, I will examine the hypothesis that training has a positive impact on organizational success and on the outcome of specific projects.
 
 ## Contents
-[Research Article]()
-[Jupyter Notebook Analysis](https://github.com/jhmorse/GovTechEmployeeTraining/blob/main/morse_project_govtech.ipynb)
-Python Source Analysis
-Data Sources
+
+* [Research Article](https://github.com/jhmorse/GovTechEmployeeTraining/blob/main/Morse%20-%20Final%20Project%20-%20AS.470.708%20Open%20Data%20with%20Python.docx)
+* [Jupyter Notebook Analysis](https://github.com/jhmorse/GovTechEmployeeTraining/blob/main/morse_project_govtech.ipynb)
+* [Python Source Analysis](https://github.com/jhmorse/GovTechEmployeeTraining/blob/main/morse_project_govtech.py)
+* [Data Sources](https://github.com/jhmorse/GovTechEmployeeTraining/tree/main/Data)
 
 
