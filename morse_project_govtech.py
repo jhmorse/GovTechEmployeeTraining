@@ -18,6 +18,7 @@ curr_dir = os.getcwd()
 #os.chdir(curr_dir)
 
 #%%
+## Load GovTech data
 
 # Path where files are located
 path = 'C:/Users/jomors/OneDrive/_JHU/AS.470.708 Open Data in Python/Project/Data/'
@@ -48,6 +49,7 @@ govtech = govtech.rename(columns = colnames)
 govtech.head()
 
 #%%
+## Update column data types in GovTech data
 # Several of the columns get read in as objects instead of numeric.
 # Need to convert these to numeric for evaluation.
 govtech['DSProgram'] = pd.to_numeric(govtech.DSProgram)
@@ -59,7 +61,7 @@ govtech.info()
 
 #%%
 
-## GovTech Projects Data
+## Load GovTech Projects Data
 #filename = '../Data/WBG_DG-GovTech_Projects_Oct2022.xlsx'
 filename = 'WBG_DG-GovTech_Projects_Oct2022.xlsx'
 projects_raw = pd.read_excel(path + filename, sheet_name = 'DG Projects', nrows=1449)
@@ -87,7 +89,7 @@ projects.head()
 
 #%%
 
-## GDP Data
+## Load GDP Data
 #filename = '../Data/API_NY.GDP.MKTP.CD_DS2_en_csv_v2_4770391.csv'
 filename = 'API_NY.GDP.MKTP.CD_DS2_en_csv_v2_4770391.csv'
 gdp_raw = pd.read_csv(path + filename, header=2)
@@ -100,8 +102,6 @@ gdp = gdp.rename(columns={'Country Name':'Country', 'Country Code':'Code', '2021
 gdp.head()
 
 #%%
-
-##############################################################
 ## Provide some summary statistics
 
 # GovTech Numeric
@@ -136,8 +136,6 @@ projects.ICROutcome.value_counts()
 projects.IEGOutcome.value_counts()
 
 #%%
-
-###########################################################
 ### Prep GTMI Data
 
 # Merge the GDP data into the GovTech GTMI data.
@@ -174,8 +172,6 @@ print(govtech_gdp['IncomeLevel'].head(10))
 print(type(govtech_gdp.IncomeLevel.array))
 
 #%%
-
-############################################################
 ### Prep Projects data
 
 ## Start with examination of Outcome scores
@@ -191,6 +187,7 @@ sns.catplot(x='IEGOutcome', data=projects, kind='count', order=category_order, c
 plt.show()
 
 #%%
+### Convert Outcome variables to bivariate
 ## We will use logistic regression for the outcome variables,
 ## so we need to convert to binary variables.
 
@@ -206,7 +203,7 @@ print(np.sum(projects.IEGOutcomeB))
 projects.head(10)
 
 #%%
-
+### Add GTMI data to Projects data
 ## Now we can join project data to GTMI data to use the Tech Enablment variables
 ## in the analysis of the project outcome status
 
@@ -252,7 +249,7 @@ projectscd.head(10)
 
 #%%
 
-# Get some basic stats on the project data
+# Get some basic stats on the project data and drop Unknown codes
 print('Total projects: ' + str(len(projectscd)))
 print('Projects with unknown countries: ' + str(np.sum(projectscd.Code == 'UNK')))
 
@@ -261,6 +258,7 @@ projectscd = projectscd[projectscd['Code'] != 'UNK']
 print('Remaining projects: ' + str(len(projectscd)))
 
 #%%
+## Final merge of porjects and GTMI data
 # Merge the projects and govtech data
 projects_gtmi = projectscd.merge(govtech_gdp, on='Code', how='left', suffixes=('_prj', ''))
 # Drop the Region and Country fields from projects in favor of the more complete govtech
@@ -270,6 +268,8 @@ projects_gtmi = projects_gtmi.drop(columns=['Region_prj', 'Country_prj'])
 projects_gtmi
 
 #%%
+### Examine GTEI and GTMI data in scatterplot
+
 #################################################################################
 ### Controlling for OVB
 
@@ -335,10 +335,7 @@ logGDPScatter.set(title='Log of GDP Across Tech Maturity and Tech Enablement Sco
 govtech_gdp['logPopulation'] = np.log(govtech_gdp['Population'])
 govtech_gdp['logGDP'] = np.log(govtech_gdp['GDP2021'])
 #%%
-
-##############################################################################
-### Correlation of GTMI to TechSkills Training
-### Start with correlation matrix
+### Correlation of GTMI to TechSkills Training - Start with correlation matrix
 
 # We are breaking this into two matrices for simplicity in reading
 columns = ['GTMI', 'GTEI', 'DS_Strategy_Program', 'FocusArea', 'DSProgram', 'DSProgramType']
@@ -354,7 +351,6 @@ subset.corr()
 
 
 #%%
-###################################################################################
 ### Regression of GTMI on TechSkills Training
 
 # Import linregress from SciPy Stats library
@@ -392,23 +388,22 @@ govtech_gdp['IL_H'] = pd.to_numeric(dummies['IL_H'])
 
 #%%
 
-# Add in our independent variables to account for OVB, including the dummies created for IncomeLevel
+# Regression with our independent variables to account for OVB, including the dummies created for IncomeLevel
 model = smf.ols('GTMI ~ GTEI + logPopulation + logGDP + IL_LM + IL_UM + IL_H', data=govtech_gdp)
 results = model.fit()
 results.summary()
 
 #%%
 
-### This section not included in Notebook
-# Control the output of the model
+### This section not included in Notebook - Control the output of the model
 print(f'Intercept: {results.params.Intercept:.4f} ({results.bse.Intercept:.4f})')
 print(f'GTEI: {results.params.GTEI:.4f} ({results.bse.GTEI:.4f})')
 print(f'Log of Pop: {results.params.logPopulation:.4f} ({results.bse.logPopulation:.4f})')
 print(f'Log of GDP: {results.params.logGDP:.4f} ({results.bse.logGDP:.4f})')
 
-print(f'Income Level = LM: {results.params.IL_LM:.4f} ({results.bse.IL_LM:.4f})')
-print(f'Income Level = UM: {results.params.IL_UM:.4f} ({results.bse.IL_UM:.4f})')
-print(f'Income Level = H: {results.params.IL_H:.4f} ({results.bse.IL_H:.4f})')
+print(f'Income Level = LM: {results.params[1]:.4f} ({results.bse[1]:.4f})')
+print(f'Income Level = UM: {results.params[2]:.4f} ({results.bse[2]:.4f})')
+print(f'Income Level = H: {results.params[3]:.4f} ({results.bse[3]:.4f})')
 
 print('------------------------------------')
 print(f'Observations: {results.nobs:.0f}')
@@ -430,7 +425,7 @@ results.summary()
 
 
 # %%
-## Repeat but regress on GTEI as the dependent variable
+## Repeat but regression on GTEI as the dependent variable
 # Build complete regression for GTEI
 model = smf.ols('GTEI ~ DS_Strategy_Program + FocusArea + DSProgram + DSProgramType + \
                 DSProgramMandatory + DSProgramExternal + DSProgramPublished +\
@@ -440,9 +435,7 @@ results = model.fit()
 results.summary()
 
 # %%
-
-######################################################################################
-### Regression of Project Outcomes
+## Add Log values to Porjects data
 
 # Add Log values of Population and GDP to the data set
 projects_gtmi['logPopulation'] = np.log(projects_gtmi['Population'])
@@ -461,7 +454,7 @@ projects_gtmi['IL_H'] = dummies['IL_H']
 projects_gtmi.head()
 
 # %%
-## Start with Generalized Linear Model from statsmodels
+## Regression of Project Outcomes - Start with Generalized Linear Model from statsmodels
 
 # Logistic regression on ICROutcome binary variable using statsmodels
 model_icr = smf.glm('ICROutcomeB ~ DS_Strategy_Program + FocusArea + DSProgram + DSProgramType + \
@@ -483,12 +476,10 @@ results_ieg.summary()
 
 
 # %%
-## As an alternative, bring in LogisticRegression
-## from the SciKit-Learn library and repeat process.
+## As an alternative, bring in LogisticRegression from the SciKit-Learn library and repeat process.
 
-# We need numy to build arrays for the logistic model
-import numpy as np
 # import sklearn libraries
+
 from sklearn.linear_model import LogisticRegression
 
 # %%
@@ -509,6 +500,7 @@ outcome_icr = np.array(projects_gtmi['ICROutcomeB'])
 outcome_icr = outcome_icr.reshape(-1,1)
 
 # %%
+## sklearn logistic regression
 # Create base LogisticRegression function
 logit_icr = LogisticRegression(penalty='l2', C=1e42, solver='liblinear')
 # Generate the model based on the arrays created above.
@@ -527,7 +519,7 @@ X_design = np.hstack([np.ones((predictors.shape[0], 1)), predictors])
 V = np.diagflat(np.product(predProbs_icr, axis=1))
 
 # Covariance matrix
-covLogit = np.linalg.inv(np.dot(np.dot(predictors.T, V), predictors))
+covLogit = np.linalg.inv(np.dot(np.dot(predictors.T, V), predictors).astype(np.float64))
 
 # Standard errors
 coef_se = np.sqrt(np.diag(covLogit))
@@ -564,7 +556,7 @@ X_design = np.hstack([np.ones((predictors.shape[0], 1)), predictors])
 V = np.diagflat(np.product(predProbs_icr, axis=1))
 
 # Covariance matrix
-covLogit = np.linalg.inv(np.dot(np.dot(predictors.T, V), predictors))
+covLogit = np.linalg.inv(np.dot(np.dot(predictors.T, V), predictors).astype(np.float64))
 
 # Standard errors
 coef_se = np.sqrt(np.diag(covLogit))
@@ -574,7 +566,6 @@ print(f'Intercept: {logit_ieg.intercept_}')
 print(pd.DataFrame({'coeff': logit_ieg.coef_[0], 'se': coef_se},index=columns + controls))
 
 #%%
-############################################################################################
 ### Prediction with Logistic Models
 
 ## For the statsmodels GLM models, we will simply compare the predicted 
@@ -620,3 +611,5 @@ print('\n')
 print('Classification Report: IEG Outcome from Logit Model')
 print(classification_report(outcome_ieg, logit_ieg.predict(predictors)))
 
+
+# %%
